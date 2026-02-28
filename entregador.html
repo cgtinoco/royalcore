@@ -4,119 +4,61 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Check-in Royal Core</title>
-    <!-- CSS: Bootstrap e FontAwesome -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
-    <!-- Firebase Compat -->
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
     
     <style>
-        body { 
-            background: #0f0f0f; 
-            color: #ffffff; 
-            display: flex; 
-            align-items: center; 
-            justify-content: center; 
-            min-height: 100vh; 
-            padding: 20px; 
-            font-family: 'Segoe UI', sans-serif;
-        }
-        .form-box { 
-            background: #1a1a1a; 
-            padding: 30px; 
-            border-radius: 20px; 
-            width: 100%; 
-            max-width: 400px; 
-            border: 1px solid #333;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-        }
-        h4 { color: #28a745; font-weight: bold; margin-bottom: 25px; }
+        body { background: #0f0f0f; color: #fff; display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 20px; font-family: 'Segoe UI', sans-serif; }
+        .form-box { background: #1a1a1a; padding: 30px; border-radius: 20px; width: 100%; max-width: 400px; border: 1px solid #333; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        .form-control { background: #2a2a2a !important; border: 2px solid #444 !important; color: #fff !important; padding: 15px !important; margin-bottom: 20px !important; font-size: 1.1rem !important; }
+        .form-control::placeholder { color: #777 !important; }
+        .btn-success { background: #28a745; border: none; padding: 18px; font-weight: bold; border-radius: 12px; }
         
-        /* CORREÇÃO DE VISIBILIDADE DOS CAMPOS */
-        .form-label { color: #aaa; font-size: 0.8rem; margin-bottom: 5px; text-transform: uppercase; }
-        
-        .form-control { 
-            background: #2a2a2a !important; 
-            border: 2px solid #444 !important; 
-            color: #ffffff !important; /* TEXTO BRANCO PARA LEITURA */
-            padding: 15px !important; 
-            margin-bottom: 20px !important;
-            font-size: 1.1rem !important;
-        }
-        
-        /* COR DO TEXTO QUANDO ESCREVE */
-        .form-control:focus {
-            background: #333 !important;
-            color: #ffffff !important;
-            border-color: #28a745 !important;
-            box-shadow: 0 0 10px rgba(40,167,69,0.2) !important;
-            outline: none;
-        }
-
-        /* COR DO TEXTO DE EXEMPLO (PLACEHOLDER) */
-        .form-control::placeholder {
-            color: #777 !important;
-            opacity: 1;
-        }
-
-        .btn-success { 
-            background: #28a745; 
-            border: none; 
-            padding: 18px; 
-            font-weight: bold; 
-            font-size: 1.2rem; 
-            border-radius: 12px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            transition: 0.3s;
-        }
-        .btn-success:hover { background: #218838; transform: translateY(-2px); }
+        /* BOTÃO DE SAÍDA */
+        .btn-danger { background: #dc3545; border: none; padding: 15px; font-weight: bold; border-radius: 12px; margin-top: 20px; width: 100%; }
         
         #active { padding: 40px 20px; }
         .radar-icon { animation: pulse 2s infinite; color: #28a745; font-size: 4rem; margin-bottom: 20px; }
-        @keyframes pulse {
-            0% { transform: scale(0.95); opacity: 0.8; }
-            50% { transform: scale(1.05); opacity: 1; }
-            100% { transform: scale(0.95); opacity: 0.8; }
-        }
+        @keyframes pulse { 0% { transform: scale(0.9); opacity: 0.7; } 50% { transform: scale(1.1); opacity: 1; } 100% { transform: scale(0.9); opacity: 0.7; } }
     </style>
 </head>
 <body>
+    <!-- TELA 1: FORMULÁRIO DE ENTRADA -->
     <div id="setup" class="form-box">
-        <h4 class="text-center"><i class="fas fa-user-shield me-2"></i> CHECK-IN VISITANTE</h4>
-        
-        <div class="mb-1">
-            <label class="form-label">Nome Completo</label>
-            <input type="text" id="name" class="form-control" placeholder="Digite seu nome">
+        <h4 class="text-center text-success mb-4"><i class="fas fa-user-shield me-2"></i> CHECK-IN ROYAL</h4>
+        <input type="text" id="name" class="form-control" placeholder="Seu Nome Completo">
+        <input type="text" id="plate" class="form-control" placeholder="Placa do Veículo">
+        <input type="number" id="house" class="form-control" placeholder="Número da Casa Destino">
+        <button class="btn btn-success w-100" onclick="ativar()"><i class="fas fa-play me-2"></i> INICIAR MONITORAMENTO</button>
+    </div>
+
+    <!-- TELA 2: RASTREAMENTO ATIVO -->
+    <div id="active" style="display:none;" class="text-center form-box">
+        <div class="radar-icon"><i class="fas fa-satellite-dish"></i></div>
+        <h3 class="text-success fw-bold">RASTREIO ATIVO</h3>
+        <p class="text-muted small">Sua posição está sendo monitorada para sua segurança.</p>
+        <div class="alert alert-dark bg-dark text-light border-secondary small mt-4">
+            <i class="fas fa-info-circle me-2"></i> Mantenha esta aba aberta até sair do condomínio.
         </div>
         
-        <div class="mb-1">
-            <label class="form-label">Placa do Veículo</label>
-            <input type="text" id="plate" class="form-control" placeholder="Ex: ABC-1234">
-        </div>
-        
-        <div class="mb-1">
-            <label class="form-label">Número da Casa</label>
-            <input type="number" id="house" class="form-control" placeholder="Destino">
-        </div>
-        
-        <button class="btn btn-success w-100 mt-2" onclick="ativar()">
-            <i class="fas fa-location-arrow me-2"></i> ATIVAR MONITORAMENTO
+        <!-- BOTÃO DE ENCERRAR -->
+        <button class="btn btn-danger" onclick="encerrarSaida()">
+            <i class="fas fa-stop-circle me-2"></i> ENCERRAR E SAIR
         </button>
     </div>
 
-    <div id="active" style="display:none;" class="text-center">
-        <div class="radar-icon"><i class="fas fa-satellite-dish"></i></div>
-        <h3 class="text-success fw-bold">RASTREIO ATIVO</h3>
-        <p class="text-muted">Sua localização está sendo monitorada pela segurança do condomínio.</p>
-        <div class="alert alert-dark bg-dark text-light border-secondary mt-4">
-            <i class="fas fa-info-circle me-2"></i> Mantenha esta página aberta até sair do condomínio.
-        </div>
+    <!-- TELA 3: FINALIZADO -->
+    <div id="finished" style="display:none;" class="text-center form-box">
+        <i class="fas fa-check-circle text-success" style="font-size: 4rem; margin-bottom: 20px;"></i>
+        <h3 class="text-white fw-bold">CHECK-OUT REALIZADO</h3>
+        <p class="text-muted">O monitoramento foi interrompido. Obrigado por respeitar as normas de segurança do condomínio.</p>
+        <button class="btn btn-outline-secondary w-100 mt-4" onclick="location.reload()">NOVA ENTRADA</button>
     </div>
 
     <script>
-        // COPIE O CONFIG DO SEU FIREBASE AQUI
+        // CONFIGURAÇÃO DO FIREBASE (USE O SEU DO PRINT)
         const firebaseConfig = {
             apiKey: "AIzaSyAEubOl0sTtLUfyX13CS_YN-xWupU7ok0w",
             authDomain: "royal-boulevard.firebaseapp.com",
@@ -129,6 +71,9 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
+        let watchId = null; // ID do sensor de GPS
+        let uid = null;    // ID único do visitante
+
         document.getElementById('name').value = localStorage.getItem('user_name') || '';
         document.getElementById('plate').value = localStorage.getItem('user_plate') || '';
 
@@ -136,7 +81,7 @@
             const name = document.getElementById('name').value;
             const plate = document.getElementById('plate').value;
             const house = document.getElementById('house').value;
-            if(!name || !plate || !house) return alert("Por favor, preencha todos os campos.");
+            if(!name || !plate || !house) return alert("Preencha todos os campos!");
 
             localStorage.setItem('user_name', name);
             localStorage.setItem('user_plate', plate);
@@ -146,20 +91,35 @@
             document.getElementById('setup').style.display = 'none';
             document.getElementById('active').style.display = 'block';
 
-            const uid = 'R-' + Math.floor(Math.random() * 9999);
+            uid = 'R-' + Math.floor(Math.random() * 9999);
 
-            navigator.geolocation.watchPosition((pos) => {
+            // Inicia o sensor de GPS e salva o ID para poder parar depois
+            watchId = navigator.geolocation.watchPosition((pos) => {
                 db.ref('trackers/' + uid).set({
                     name, plate, house,
                     lat: pos.coords.latitude,
                     lng: pos.coords.longitude,
-                    accuracy: pos.coords.accuracy,
                     speed: (pos.coords.speed || 0) * 3.6,
                     timestamp: Date.now()
                 });
-            }, (err) => {
-                alert("Erro ao acessar GPS. Por favor, autorize a localização.");
-            }, { enableHighAccuracy: true, maximumAge: 0 });
+            }, null, { enableHighAccuracy: true, maximumAge: 0 });
+        }
+
+        // FUNÇÃO PARA ENCERRAR TUDO
+        function encerrarSaida() {
+            if (confirm("Deseja realmente encerrar o monitoramento e sair?")) {
+                // 1. Para o sensor de GPS (economiza bateria e para de ler posição)
+                if (watchId) navigator.geolocation.clearWatch(watchId);
+
+                // 2. Remove o visitante do mapa da portaria IMEDIATAMENTE
+                if (uid) {
+                    db.ref('trackers/' + uid).remove().then(() => {
+                        // 3. Muda a tela para "Finalizado"
+                        document.getElementById('active').style.display = 'none';
+                        document.getElementById('finished').style.display = 'block';
+                    });
+                }
+            }
         }
     </script>
 </body>
